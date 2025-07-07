@@ -1,0 +1,29 @@
+import './App.css';
+import Header from './MyComponents/Header.js'
+import {Footer} from './MyComponents/Footer.js'
+import {Todos} from './MyComponents/Todos.js'
+import {TodoItem} from './MyComponents/TodoItem.js'
+function App() {
+  let todos = [
+    { srno: 1, title: "Learn React", desc: "Start with basics and components." },
+    { srno: 2, title: "Build Todo App", desc: "Practice props and mapping." },
+    { srno: 3, title: "Use Hooks", desc: "Learn useState and useEffect." },
+    { srno: 4, title: "Handle Events", desc: "Learn how to handle events in React." },
+    { srno: 5, title: "Conditional Rendering", desc: "Render components based on conditions." },
+    { srno: 6, title: "React Router", desc: "Set up multiple pages using routing." },
+    { srno: 7, title: "Form Handling", desc: "Handle user input using forms." },
+    { srno: 8, title: "API Integration", desc: "Fetch data using fetch or axios." },
+    { srno: 9, title: "UseContext", desc: "Manage global state using context API." },
+    { srno: 10, title: "Deploy App", desc: "Deploy the app using Vercel or Netlify." }
+  ]
+  
+  return (
+    <>
+      <Header title="Check List"/>
+      <Todos todos={todos}/>
+      <Footer/>
+    </>
+  );
+}
+
+export default App;
