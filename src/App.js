@@ -4,12 +4,28 @@ import {Footer} from './MyComponents/Footer.js'
 import {Todos} from './MyComponents/Todos.js'
 import {TodoItem} from './MyComponents/TodoItem.js'
 import { useState } from 'react';
+import { AddTodo } from './MyComponents/AddTodo';
 
 
 function App() {
   const onDelete = (todo) => {
     setTodos(todos.filter((e) => e !== todo));
   };
+  const addTodo = (title,desc)=>{
+    let srno;
+    if(todos.length==0){
+      srno =0;
+    }
+    else{
+      srno =todos[todos.length-1].srno+1;
+    }
+    const myTodo ={
+      srno : srno,
+      title: title,
+      desc : desc,
+    }
+    setTodos([...todos,myTodo]);
+  }
   
   const [todos, setTodos] = useState([
     { srno: 1, title: "Learn React", desc: "Start with basics and components." },
@@ -27,6 +43,7 @@ function App() {
   return (
     <>
       <Header title="Check List"/>
+      <AddTodo addTodo={addTodo}/>
       <Todos todos={todos} onDelete={onDelete}/>
       <Footer/>
     </>
