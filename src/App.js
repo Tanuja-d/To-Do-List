@@ -1,52 +1,65 @@
 import './App.css';
-import Header from './MyComponents/Header.js'
-import {Footer} from './MyComponents/Footer.js'
-import {Todos} from './MyComponents/Todos.js'
-import {TodoItem} from './MyComponents/TodoItem.js'
-import { useState } from 'react';
+import Header from './MyComponents/Header.js';
+import { Footer } from './MyComponents/Footer.js';
+import { Todos } from './MyComponents/Todos.js';
 import { AddTodo } from './MyComponents/AddTodo';
+import { About } from './MyComponents/About.js';
+import { useState, useEffect } from 'react';
 
+import {
+  BrowserRouter,   // router provider
+  Routes,          // v6 replacement for <Switch>
+  Route
+} from 'react-router-dom';
 
 function App() {
-  const onDelete = (todo) => {
-    setTodos(todos.filter((e) => e !== todo));
-  };
-  const addTodo = (title,desc)=>{
-    let srno;
-    if(todos.length==0){
-      srno =0;
+  // ---------- localStorage initial load ----------
+  let initTodo = [];
+  const stored = localStorage.getItem('todos');
+  if (stored) {
+    try {
+      initTodo = JSON.parse(stored);
+    } catch {
+      /* ignore bad JSON */ 
     }
-    else{
-      srno =todos[todos.length-1].srno+1;
-    }
-    const myTodo ={
-      srno : srno,
-      title: title,
-      desc : desc,
-    }
-    setTodos([...todos,myTodo]);
   }
-  
-  const [todos, setTodos] = useState([
-    { srno: 1, title: "Learn React", desc: "Start with basics and components." },
-    { srno: 2, title: "Build Todo App", desc: "Practice props and mapping." },
-    { srno: 3, title: "Use Hooks", desc: "Learn useState and useEffect." },
-    { srno: 4, title: "Handle Events", desc: "Learn how to handle events in React." },
-    { srno: 5, title: "Conditional Rendering", desc: "Render components based on conditions." },
-    { srno: 6, title: "React Router", desc: "Set up multiple pages using routing." },
-    { srno: 7, title: "Form Handling", desc: "Handle user input using forms." },
-    { srno: 8, title: "API Integration", desc: "Fetch data using fetch or axios." },
-    { srno: 9, title: "UseContext", desc: "Manage global state using context API." },
-    { srno: 10, title: "Deploy App", desc: "Deploy the app using Vercel or Netlify." }
-  ]);
-  
+
+  // ---------- state ----------
+  const [todos, setTodos] = useState(initTodo);
+
+  // ---------- persist on change ----------
+  useEffect(() => {
+    localStorage.setItem('todos', JSON.stringify(todos));
+  }, [todos]);
+
+  // ---------- handlers ----------
+  const onDelete = (todo) => setTodos(todos.filter((t) => t !== todo));
+
+  const addTodo = (title, desc) => {
+    const srno = todos.length === 0 ? 0 : todos[todos.length - 1].srno + 1;
+    setTodos([...todos, { srno, title, desc }]);
+  };
+
+  // ---------- UI ----------
   return (
-    <>
-      <Header title="Check List"/>
-      <AddTodo addTodo={addTodo}/>
-      <Todos todos={todos} onDelete={onDelete}/>
-      <Footer/>
-    </>
+    <BrowserRouter>
+      <Header title="Check List" />
+
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <>
+              <AddTodo addTodo={addTodo} />
+              <Todos todos={todos} onDelete={onDelete} />
+            </>
+          }
+        />
+        <Route path="/about" element={<About />} />
+      </Routes>
+
+      <Footer />
+    </BrowserRouter>
   );
 }
 
