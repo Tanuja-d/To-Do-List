@@ -4,60 +4,75 @@ import { Footer } from './MyComponents/Footer.js';
 import { Todos } from './MyComponents/Todos.js';
 import { AddTodo } from './MyComponents/AddTodo';
 import { About } from './MyComponents/About.js';
+import { Progress } from './MyComponents/Progress'; // New component
 import { useState, useEffect } from 'react';
-
-import {
-  BrowserRouter,   // router provider
-  Routes,          // v6 replacement for <Switch>
-  Route
-} from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 function App() {
-  // ---------- localStorage initial load ----------
-  let initTodo = [];
-  const stored = localStorage.getItem('todos');
-  if (stored) {
+  const [todos, setTodos] = useState(() => {
     try {
-      initTodo = JSON.parse(stored);
+      const stored = localStorage.getItem('todos');
+      return stored ? JSON.parse(stored) : [];
     } catch {
-      /* ignore bad JSON */ 
+      return [];
     }
-  }
+  });
 
-  // ---------- state ----------
-  const [todos, setTodos] = useState(initTodo);
+  const [filter, setFilter] = useState('all'); // 'all', 'active', 'completed'
 
-  // ---------- persist on change ----------
   useEffect(() => {
     localStorage.setItem('todos', JSON.stringify(todos));
   }, [todos]);
 
-  // ---------- handlers ----------
-  const onDelete = (todo) => setTodos(todos.filter((t) => t !== todo));
-
   const addTodo = (title, desc) => {
-    const srno = todos.length === 0 ? 0 : todos[todos.length - 1].srno + 1;
-    setTodos([...todos, { srno, title, desc }]);
+    const srno = todos.length > 0 ? todos[todos.length - 1].srno + 1 : 1;
+    setTodos([...todos, { srno, title, desc, completed: false }]);
   };
 
-  // ---------- UI ----------
+  const onDelete = (todoToDelete) => {
+    setTodos(todos.filter((t) => t.srno !== todoToDelete.srno));
+  };
+  
+  const toggleComplete = (todoToToggle) => {
+    setTodos(todos.map(todo => 
+      todo.srno === todoToToggle.srno ? { ...todo, completed: !todo.completed } : todo
+    ));
+  };
+
+  const filteredTodos = todos.filter(todo => {
+    if (filter === 'completed') return todo.completed;
+    if (filter === 'active') return !todo.completed;
+    return true; // 'all'
+  });
+
+  const completedCount = todos.filter(t => t.completed).length;
+  const totalCount = todos.length;
+  const progress = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
+
   return (
     <BrowserRouter>
       <Header title="Check List" />
-
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <>
-              <AddTodo addTodo={addTodo} />
-              <Todos todos={todos} onDelete={onDelete} />
-            </>
-          }
-        />
-        <Route path="/about" element={<About />} />
-      </Routes>
-
+      <main className="main-content">
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <>
+                <AddTodo addTodo={addTodo} />
+                <Progress progress={progress}/>
+                <Todos
+                  todos={filteredTodos}
+                  onDelete={onDelete}
+                  onToggleComplete={toggleComplete}
+                  filter={filter}
+                  setFilter={setFilter}
+                />
+              </>
+            }
+          />
+          <Route path="/about" element={<About />} />
+        </Routes>
+      </main>
       <Footer />
     </BrowserRouter>
   );
